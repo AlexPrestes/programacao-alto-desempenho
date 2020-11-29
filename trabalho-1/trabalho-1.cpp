@@ -75,8 +75,6 @@ public:
 
     return size_triangle;
   }
-  
-  ~AdjacencyList() {};
 };
 
 //
@@ -89,7 +87,8 @@ inline float agglomeration(float &triangle, float &edge);
 
 int main(int argc, char *argv[]) {
   if (argc != 2) {
-    cerr << "Erro!" << endl;
+    cerr << argv[0] << " <filename.edgelist>" << endl;
+    exit(BAD_ARGUMENT);
   }
  
   float size_triangle, size_edge;
@@ -124,7 +123,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-inline float agglomeration(float &triangle, float &edge) { return 2*triangle/(edge*(edge-1)); }
+inline float agglomeration(float &triangle, float &edge) { return (edge < 2) ? 0 : 2*triangle/(edge*(edge-1)); }
 
 void populaGraph(AdjacencyList &graphAL, string &filename) {
   string line;

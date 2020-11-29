@@ -46,6 +46,7 @@ public:
   float get_size_triangle(size_t &i_vertex) {
     auto size_triangle = 0;
 
+
     for (auto j_vertex = _data[i_vertex].begin(); j_vertex != _data[i_vertex].end(); ++j_vertex) {
       auto j_size = _data[*j_vertex].size();
 
@@ -85,7 +86,7 @@ float agglomeration(float &triangle, float &edge);
 int main(int argc, char *argv[]) {
   if (argc != 3) {
     cerr << argv[0] << " <filename.edgelist> <num_threads>" << endl;
-    return 0;
+    exit(BAD_ARGUMENT);
   }
  
   float size_triangle, size_edge;
@@ -105,7 +106,7 @@ int main(int argc, char *argv[]) {
 
   t0 = chrono::high_resolution_clock::now();
 #pragma omp parallel for default(none) private(size_edge, size_triangle) \
-  shared(N, graphAL, coefAgglo) num_threads(num_threads) schedule(dynamic)
+            shared(N, graphAL, coefAgglo) num_threads(num_threads) schedule(dynamic)
   // loop que faz a chamada para cada nó do grafo
   // e armazena a saida em um vetor
   for (size_t i = 0; i < N; i++) {
@@ -130,7 +131,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-float agglomeration(float &triangle, float &edge) { return 2*triangle/(edge*(edge-1)); }
+float agglomeration(float &triangle, float &edge) { return (edge < 2) ? 0 : 2*triangle/(edge*(edge-1)); }
 
 void populaGraph(AdjacencyList &graphAL, string &filename) {
   string line;
