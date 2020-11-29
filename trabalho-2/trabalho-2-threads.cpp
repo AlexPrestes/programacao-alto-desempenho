@@ -46,13 +46,10 @@ public:
   float get_size_triangle(size_t &i_vertex) {
     auto size_triangle = 0;
 
-    int j = 0;
-
     for (auto j_vertex = _data[i_vertex].begin(); j_vertex != _data[i_vertex].end(); ++j_vertex) {
       auto j_size = _data[*j_vertex].size();
-      j++;
 
-      for (auto k_vertex = _data[i_vertex].begin()+j ; k_vertex != _data[i_vertex].end(); ++k_vertex ) {
+      for (auto k_vertex = j_vertex + 1; k_vertex != _data[i_vertex].end(); ++k_vertex ) {
         auto k_size = _data[*k_vertex].size();
 
         if (k_size < j_size) {
@@ -75,8 +72,6 @@ public:
 
     return size_triangle;
   }
-  
-  ~AdjacencyList() {};
 };
 
 //
@@ -85,11 +80,12 @@ public:
 // Função que le o arquivo e armazena na lista de adjacencia
 void populaGraph(AdjacencyList &graphAL, string &filename);
 // função que calcula o coeficiente de aglomeração
-inline float agglomeration(float &triangle, float &edge);
+float agglomeration(float &triangle, float &edge);
 
 int main(int argc, char *argv[]) {
-  if (argc != 2) {
-    cerr << "Erro!" << endl;
+  if (argc != 3) {
+    cerr << argv[0] << " <filename.edgelist> <num_threads>" << endl;
+    return 0;
   }
  
   float size_triangle, size_edge;
@@ -98,11 +94,18 @@ int main(int argc, char *argv[]) {
   size_t pos1 = filename.find('_', pos);
   size_t N = stoul(filename.substr(pos, pos1-pos));
   vector<float> coefAgglo(N);
+  int num_threads = stoi(argv[2]);
+
+  chrono::high_resolution_clock::time_point t0;
+  chrono::high_resolution_clock::time_point t1;
 
   AdjacencyList graphAL(N);
 
   populaGraph(graphAL, filename);
-  
+
+  t0 = chrono::high_resolution_clock::now();
+#pragma omp parallel for default(none) private(size_edge, size_triangle) \
+  shared(N, graphAL, coefAgglo) num_threads(num_threads) schedule(dynamic)
   // loop que faz a chamada para cada nó do grafo
   // e armazena a saida em um vetor
   for (size_t i = 0; i < N; i++) {
@@ -110,6 +113,9 @@ int main(int argc, char *argv[]) {
     size_triangle = graphAL.get_size_triangle(i);
     coefAgglo[i] = agglomeration(size_triangle, size_edge);
   }
+  
+  t1 = chrono::high_resolution_clock::now();
+  cout << (t1-t0).count()/1e9 << " (s)" << endl;
  
   // abre o arquivo de saida e grava dos dados
   ofstream ofilename;
@@ -124,7 +130,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-inline float agglomeration(float &triangle, float &edge) { return 2*triangle/(edge*(edge-1)); }
+float agglomeration(float &triangle, float &edge) { return 2*triangle/(edge*(edge-1)); }
 
 void populaGraph(AdjacencyList &graphAL, string &filename) {
   string line;

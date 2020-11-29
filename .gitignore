@@ -1,7 +1,7 @@
-trabalho-1/*.cls
-trabalho-1/*.edgelist
-trabalho-1/*.tar.gz
-trabalho-1/*.exe
-!trabalho-1/*_n_10_k_4_*
-!trabalho-1/expected_*_n_10_k_4_*
+trabalho-*/*.cls
+trabalho-*/*.edgelist
+trabalho-*/*.tar.gz
+trabalho-*/*.exe
+!trabalho-*/*_n_10_k_4_*
+!trabalho-*/expected_*_n_10_k_4_*
 semana-*
