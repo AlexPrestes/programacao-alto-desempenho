@@ -3,7 +3,6 @@
 #include <vector>
 #include <algorithm>
 #include <string>
-#include <chrono>
 
 using namespace std;
 
@@ -97,14 +96,10 @@ int main(int argc, char *argv[]) {
   vector<float> coefAgglo(N);
   int num_threads = stoi(argv[2]);
 
-  chrono::high_resolution_clock::time_point t0;
-  chrono::high_resolution_clock::time_point t1;
-
   AdjacencyList graphAL(N);
 
   populaGraph(graphAL, filename);
 
-  t0 = chrono::high_resolution_clock::now();
 #pragma omp parallel for default(none) private(size_edge, size_triangle) \
             shared(N, graphAL, coefAgglo) num_threads(num_threads) schedule(dynamic)
   // loop que faz a chamada para cada nó do grafo
@@ -115,9 +110,6 @@ int main(int argc, char *argv[]) {
     coefAgglo[i] = agglomeration(size_triangle, size_edge);
   }
   
-  t1 = chrono::high_resolution_clock::now();
-  cout << (t1-t0).count()/1e9 << " (s)" << endl;
- 
   // abre o arquivo de saida e grava dos dados
   ofstream ofilename;
   size_t pos_dot = filename.find('.');
